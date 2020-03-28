@@ -1,11 +1,31 @@
+//  arr_ = [0, 1, 2, 3, 4, 5, 6, 7,  8,  9, 10,11];
 var arr1 = [5, 3, 2, 6, 7, 9, 1, 0, -1, -7, 10, 8];
-var arr2 = [5, 3, 2, 6, 7, 9, 1, 0, -1, -7, 10, 8];
+var arr2 = [-5, 3, 2, -6, 7, 9, 1, -10, -1, -7, 10, 8];
 var arr3 = [5, 3, 2, 6, 7, 9, 1, 0, -1, -7, 10, 8];
 var arr5 = [5, 3, 2, 6, 7, 9, 1, 0, -1, -7, 10, 8];
+var table;
 
 window.onload = () => {
     // [2,3,8,6,1] = 5 inversions
-    console.log(selectionSort(arr3));
+    // selectionSort(arr3)
+    // console.log(arr3.join(' '));
+    // var data = {
+    //     // A labels array that can contain any sort of values
+    //     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    //     // Our series array that contains series objects or in this case series data arrays
+    //     series: [
+    //       [5, 2, 4, 2, 0],
+    //       [0, 2, 3, 4, 5]
+    //     ]
+    //   };
+      
+    //   // Create a new line chart object where as first parameter we pass in a selector
+    //   // that is resolving to our chart container element. The Second parameter
+    //   // is the actual data object.
+    //   new Chartist.Line('.ct-chart', data);
+    table = $('#tbody');
+    console.log(maxSubArrayBrutForce(arr2));
+    console.log(maxSubArrayRecursive(arr2));
 }
 
 /**
@@ -14,7 +34,7 @@ window.onload = () => {
  * the number of inversions in an array
  */
 
-// O(n^2)
+// ϴ(n^2)
 function bubbleSort(arr) {
     let inversions = 0;
     for (let i = 0; i < arr.length - 1; i++) {
@@ -33,22 +53,20 @@ function bubbleSort(arr) {
 }
 
 
-// O(n^2)
+// ϴ(n^2)
 function selectionSort(arr) {
-    let inversions = 0;
     for (let i = 0; i < arr.length; i++) {
         let min = i;
-        for (let j = i + 1; j < arr.length; j++)
+        for (let j = i + 1; j < arr.length; j++) {
             if (arr[j] < arr[min]) {
                 min = j;
-                inversions++;
             }
+        }
         arr[i] = [arr[min], arr[min] = arr[i]][0];
     }
-    return inversions;
 }
 
-// O(n^2)
+// ϴ(n^2)
 function insertionSort(arr, decreasing = false) {
     let inversions = 0;
     for (let i = 1; i < arr.length; i++) {
@@ -101,7 +119,7 @@ function mergeSort(arr) {
     merge_sort(arr, 0, arr.length - 1);
 }
 
-// O(n)
+// ϴ(n)
 function merge(arr, a, b, c) {
     let arr1 = arr.slice(a, b + 1);
     arr1.push(Infinity); // sentinal card
@@ -126,7 +144,7 @@ function merge(arr, a, b, c) {
     return inversions;
 }
 
-// O(nlogn)
+// ϴ(nlogn)
 function merge_sort(arr, b, e) {
     if (b < e) {
         let q = Math.floor((b + e) / 2)
@@ -136,7 +154,7 @@ function merge_sort(arr, b, e) {
     }
 }
 
-// O(nk+nlog(n/k))
+// ϴ(nk+nlog(n/k))
 function hybridMergeInsertionSort(arr, k = 20) {
     hybrid_merge_ins_sort(arr, 0, arr.length - 1, k);
 }
@@ -153,14 +171,21 @@ function hybrid_merge_ins_sort(arr, b, e, k) {
     }
 }
 
-// O(n)
+// ϴ(n)
 function linearSearch(val, arr) {
     let j = 0;
     while (j++ < arr.length && arr[j] != val);
     return (j < arr.length) ? j : -1;
 }
 
-// O(logn)
+function recursiveLinearSearch(val, arr) {
+    // base cases
+    if (!arr.length) return -1;
+    if (arr[arr.length-1] === val) return arr.length-1;
+    return recursiveLinearSearch(val, arr.slice(0,arr.length - 1))
+}
+
+// ϴ(logn)
 function binarySearch(val, arr) {
     let l = 0,
         r = arr.length - 1;
@@ -176,7 +201,7 @@ function binarySearch(val, arr) {
     return -1;
 }
 
-// O(nlogn + n)
+// ϴ(nlogn + n)
 function areThere2ValWithSum(arr, val) {
     mergeSort(arr); //nlogn
     for (let i = 0; i < arr.length; i++) //n
@@ -205,7 +230,7 @@ function add2BinaryNumbers(a, b) {
     return result;
 }
 
-// Horner’s rule O(n)
+// Horner’s rule ϴ(n)
 // a_0 + x * ( a_1 + x * (a_2 + ... + x * (a_(n-1) + x*a_n) ...))
 function calcPolynomial(x, a) {
     let y = 0;
@@ -214,7 +239,7 @@ function calcPolynomial(x, a) {
     return y;
 }
 
-// O(n^2)
+// ϴ(n^2)
 // Inversion : i < j and per[i] > per[j]
 // Note :  i+1 < j < per.length
 function numberOfInversions(per) {
@@ -225,7 +250,7 @@ function numberOfInversions(per) {
     return inversions;
 }
 
-// O(n logn)
+// ϴ(n logn)
 // number of inversions with modified merge sort
 // convenience function
 function numberOfInversionsModifiedMergeSort(arr) {
@@ -240,4 +265,89 @@ function _numberOfInversionsModifiedMergeSort(arr, b, e) {
         return i + j + merge(arr, b, q, e);
     }
     return 0;
+}
+
+// ϴ(n^2)
+function maxSubArrayBrutForce(arr) {
+    let maxSubArr = {
+        start: 0,
+        end: 0,
+        sum: -Infinity
+    };
+    for (let i=0; i<arr.length-1; i++) {
+        let sum = arr[i];
+        for (let j=i+1; j< arr.length; j++) {
+            sum += arr[j];
+            if(sum >= maxSubArr.sum)
+                maxSubArr = {start: i, end: j, sum: sum};
+        }
+    }
+    return maxSubArr;
+}
+
+// ϴ(n logn)
+// convenience funtion
+function maxSubArrayRecursive(arr) {
+    return _maxSubArrayRecursive(arr,0,arr.length - 1);
+}
+
+function _maxSubArrayRecursive(arr, start, end) {
+    // base case (1 element in array)
+    if (start === end) return {start: start, end: end, sum: arr[start]}
+    /**
+     * else solve recursively
+     * the maximum subarray may fall in totally in the left half,
+     * totally in the right half, or in between
+     *  */
+    let mid = Math.floor((start+end)/2);
+    let right = _maxSubArrayRecursive(arr,mid+1,end);
+    let left = _maxSubArrayRecursive(arr,start,mid);
+    let crossing = maxCrossingSubArray(arr,start,mid,end);
+    // for debugging 
+    // let row = '<tr><td>' + start + '</td><td>' + mid + '</td><td>' + end + '</td><td>' + '[' + arr.slice(start,end+1).join(' ') + ']' + '</td><td>'
+    //             + '(' + left.start + ',' + left.end + ',' + left.sum + ')</td><td>' 
+    //             + '(' + crossing.start + ',' + crossing.end + ',' + crossing.sum + ')</td><td>'
+    //             + '(' + right.start + ',' + right.end + ',' + right.sum + ')</td></tr>';
+    // table.prepend(row);
+    // this can be replacesd by an array sort
+    if (left.sum >= right.sum && left.sum >= crossing.sum)
+        return left;
+    else if (right.sum >= left.sum && right.sum >= crossing.sum)
+        return right;
+    else return crossing;
+}
+
+// for array of 6 elements (arr.length) mid should be 2
+// for array of 5 elements (arr.length) mid should be 1
+function maxCrossingSubArray(arr, start, mid, end) {
+    // find maximum left subarray
+    let maxSubArrLeft = {
+        start: 0,
+        end: mid,
+        sum: -Infinity
+    };
+    let tempSum = 0;
+    // for array of 6 this loops through INDEXES 0,1,2
+    for (let i=mid; i>=start; i--) {
+        tempSum += arr[i];
+        if (tempSum > maxSubArrLeft.sum)
+            maxSubArrLeft = {start: i, end: mid, sum: tempSum};
+    }
+    // find maximum right subarray
+    let maxSubArrRight = {
+        start: 0,
+        end: mid,
+        sum: -Infinity
+    };
+    tempSum = 0;
+    // for array of 6 this loops through INDEXES 3,4,5
+    for (let i=mid+1; i<=end; i++) {
+        tempSum += arr[i];
+        if (tempSum > maxSubArrRight.sum)
+            maxSubArrRight = {start: mid, end: i, sum: tempSum};
+    }
+
+    return {start: maxSubArrLeft.start,
+        end: maxSubArrRight.end,
+        sum: maxSubArrLeft.sum + maxSubArrRight.sum}
 }

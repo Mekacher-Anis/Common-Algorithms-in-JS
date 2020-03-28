@@ -1,0 +1,7 @@
+body {
+  overflow-y: hidden;
+}
+
+#main-chart {
+  height: 100vh;
+}

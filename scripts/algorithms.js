@@ -4,28 +4,98 @@ var arr2 = [-5, 3, 2, -6, 7, 9, 1, -10, -1, -7, 10, 8];
 var arr3 = [5, 3, 2, 6, 7, 9, 1, 0, -1, -7, 10, 8];
 var arr5 = [5, 3, 2, 6, 7, 9, 1, 0, -1, -7, 10, 8];
 var table;
+var data = {
+    // A labels array that can contain any sort of values
+    labels: [],
+    // Our series array that contains series objects or in this case series data arrays
+    series: []
+};
+var matrix1 = [
+    [3,-2,5],
+    [0,8,4],
+    [3,5,1]
+];
 
+var matrix2 = [
+    [1,2,3],
+    [1,2,3],
+    [1,2,3]
+];
 window.onload = () => {
-    // [2,3,8,6,1] = 5 inversions
-    // selectionSort(arr3)
-    // console.log(arr3.join(' '));
-    // var data = {
-    //     // A labels array that can contain any sort of values
-    //     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-    //     // Our series array that contains series objects or in this case series data arrays
-    //     series: [
-    //       [5, 2, 4, 2, 0],
-    //       [0, 2, 3, 4, 5]
-    //     ]
-    //   };
-      
-    //   // Create a new line chart object where as first parameter we pass in a selector
-    //   // that is resolving to our chart container element. The Second parameter
-    //   // is the actual data object.
-    //   new Chartist.Line('.ct-chart', data);
+    performance.now();
+    performance.now();
+    let res = testForDifferentInputSizes(
+        [maxSubArrayRecursive,maxSubArrayLinear]
+        ,100,10000000,100000);
+    data.labels = res.labels;
+    data.series = res.results;
+    console.log(res.values);
+    new Chartist.Line('.ct-chart', data, {showPoint: false});
     table = $('#tbody');
-    console.log(maxSubArrayBrutForce(arr2));
-    console.log(maxSubArrayRecursive(arr2));
+    // let arr = generateRandomArray(10);
+    // console.log(arr.join(' '));
+    // console.log(maxSubArrayRecursive(arr));
+    // console.log(maxSubArrayLinear(arr));
+}
+
+function testForDifferentInputSizes (algorithms, minN=10, maxN=20000, step=100,
+    rangeMin=-1000, rangeMax=1000, floats=false) {
+    let arr = [];
+    let labels = []; // holds sample size labels
+    let results = []; // holds test results
+    let values = []; // holds test return values
+    for (let size=minN; size<=maxN; size += step) {
+        // console.log('Started testing ' + algo.name + ' with sample size ' + size);
+        
+        // fill the array to the next sample size
+        for (let i=arr.length; i<size; i++) {
+            const rand = Math.random() * (rangeMax - rangeMin);
+            let val = rangeMin + (floats ? rand : Math.floor(rand));
+            arr.push(val);
+        }
+        // labels.push(size);
+        // test the given algorithms on this sample size
+        for (let i=0; i<algorithms.length; i++) {
+            let start = performance.now();
+            let val = (algorithms[i])(arr.slice());
+            let elapsed = performance.now() - start;
+            // console.log('Finished testing ' + algo.name + ' with sample size ' + size);
+            if (!results[i]) results[i] = [];
+            results[i].push(elapsed);
+            if (!values[i]) values[i] = [];
+            values[i].push(val);
+        }
+    }
+    
+    return {labels: labels, results: results, values: values};
+}
+
+function generateRandomArray (size, array, offset=0, rangeMin=-1000, rangeMax=1000, floats=false) {
+    let arr = array || [];
+    offset = array ? array.length : 0;
+    // fill the array to the next sample size
+    for (let i=offset; i<size; i++) {
+        const rand = Math.random() * (rangeMax - rangeMin);
+        let val = rangeMin + (floats ? rand : Math.floor(rand));
+        arr.push(val);
+    }
+    return arr;
+}
+
+function generateRandomMatrix(n, rangeMin=-1000, rangeMax=1000, floats=false) {
+    let res = [];
+    // let log = '';
+    for (let i=0; i<n; i++) {
+        res[i] = [];
+        for (let j=0; j<n; j++) {
+            const rand = Math.random() * (rangeMax - rangeMin);
+            res[i][j] = rangeMin + (floats ? rand : Math.floor(rand));
+            // log += res[i][j] + ' ';
+        }
+        // log += '\n';
+    }
+    // console.log(log);
+    return res;
 }
 
 /**
@@ -267,16 +337,17 @@ function _numberOfInversionsModifiedMergeSort(arr, b, e) {
     return 0;
 }
 
+// find the subarray with the highest sum
 // ϴ(n^2)
-function maxSubArrayBrutForce(arr) {
+function maxSubArrayBrutforce(arr) {
     let maxSubArr = {
         start: 0,
         end: 0,
         sum: -Infinity
     };
-    for (let i=0; i<arr.length-1; i++) {
-        let sum = arr[i];
-        for (let j=i+1; j< arr.length; j++) {
+    for (let i=0; i<arr.length; i++) {
+        let sum = 0;
+        for (let j=i; j< arr.length; j++) {
             sum += arr[j];
             if(sum >= maxSubArr.sum)
                 maxSubArr = {start: i, end: j, sum: sum};
@@ -304,7 +375,8 @@ function _maxSubArrayRecursive(arr, start, end) {
     let left = _maxSubArrayRecursive(arr,start,mid);
     let crossing = maxCrossingSubArray(arr,start,mid,end);
     // for debugging 
-    // let row = '<tr><td>' + start + '</td><td>' + mid + '</td><td>' + end + '</td><td>' + '[' + arr.slice(start,end+1).join(' ') + ']' + '</td><td>'
+    // let row = '<tr><td>' + start + '</td><td>' + mid + '</td><td>' + end + '</td><td>'
+    //             + '[' + arr.slice(start,end+1).join(' ') + ']' + '</td><td>'
     //             + '(' + left.start + ',' + left.end + ',' + left.sum + ')</td><td>' 
     //             + '(' + crossing.start + ',' + crossing.end + ',' + crossing.sum + ')</td><td>'
     //             + '(' + right.start + ',' + right.end + ',' + right.sum + ')</td></tr>';
@@ -350,4 +422,51 @@ function maxCrossingSubArray(arr, start, mid, end) {
     return {start: maxSubArrLeft.start,
         end: maxSubArrRight.end,
         sum: maxSubArrLeft.sum + maxSubArrRight.sum}
+}
+
+/**
+ * Kadane's Algorithm
+ * explanation : at each iteration `i` find the longest subarray that ends
+ * at the current index (the current index MUST be included in the subarray)
+ * so at each iteration one has two choices, either extend the last maximum
+ * subarray, ending at index `i-1`, or start a new maximum subarray starting
+ * at index `i`, the compare the sum of this maiximum "local" subarray to the
+ * global maximum subarray
+ * ϴ(n)
+ */
+function maxSubArrayLinear(arr) {
+    let msa = {start: 0, end:0, sum: arr[0]};
+    let general = {start: 0, end:0, sum: arr[0]};
+    for (let i=1; i<arr.length; i++) {
+        // extend current maximum subarray
+        // or start a new one
+        if (msa.sum + arr[i] > arr[i]) {
+            msa.end = i;
+            msa.sum += arr[i];
+        } else {
+            msa.start = msa.end = i;
+            msa.sum = arr[i];
+        }
+
+        if (msa.sum > general.sum) {
+            general = {...msa} // shallow copy;
+        }
+    }
+
+    return general;
+}
+
+// ϴ(n^3)
+function multiplySquareMatrixNormalMehtod(matrix1, matrix2) {
+    let res = [];
+    let n = matrix1.length;
+    for (let i = 0; i < n; i++) {
+        res[i] = [];
+        for (let j = 0; j < n; j++) {
+            res[i][j] = 0;
+            for (let k=0; k<n; k++)
+                res[i][j] += matrix1[i][k] * matrix2[k][j];
+        }
+    }
+    return res;
 }

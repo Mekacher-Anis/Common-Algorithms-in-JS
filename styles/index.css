@@ -5,3 +5,11 @@ body {
 #main-chart {
   height: 100vh;
 }
+
+.ct-series-a .ct-line {
+  stroke: #e74c3c;
+}
+
+.ct-series-b .ct-line {
+  stroke: #3498db;
+}

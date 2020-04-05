@@ -22,20 +22,18 @@ var matrix2 = [
     [1,2,3]
 ];
 window.onload = () => {
-    performance.now();
-    performance.now();
-    let res = testForDifferentInputSizes(
-        [maxSubArrayRecursive,maxSubArrayLinear]
-        ,100,10000000,100000);
-    data.labels = res.labels;
-    data.series = res.results;
-    console.log(res.values);
-    new Chartist.Line('.ct-chart', data, {showPoint: false});
-    table = $('#tbody');
-    // let arr = generateRandomArray(10);
-    // console.log(arr.join(' '));
-    // console.log(maxSubArrayRecursive(arr));
-    // console.log(maxSubArrayLinear(arr));
+    // let res = testForDifferentInputSizes(
+    //     [maxSubArrayRecursive,maxSubArrayLinear]
+    //     ,100,10000000,100000);
+    // data.labels = res.labels;
+    // data.series = res.results;
+    // console.log(res.values);
+    // new Chartist.Line('.ct-chart', data, {showPoint: false});
+    // table = $('#tbody');
+    // let lcs = getAllSebsquences('ABCDEF'.split(''),4);
+    // printArray(lcs);
+    // console.log(longestCommonSubsequenceBruteforce('ACDCABDBADCACDCDBCCD'.split(''),
+    //                                             'CBDDDDDBCCAAAABBCDAC'.split('')));
 }
 
 function testForDifferentInputSizes (algorithms, minN=10, maxN=20000, step=100,
@@ -96,6 +94,31 @@ function generateRandomMatrix(n, rangeMin=-1000, rangeMax=1000, floats=false) {
     }
     // console.log(log);
     return res;
+}
+
+function printArray(arr, _log=true, printSize=true) {
+    let log = '[';
+    for (let i=0; i<arr.length; i++) {
+        if (arr[i] instanceof Array)
+            log += printArray(arr[i], false, false) + ',';
+        else
+            log += (i === 0) ? arr[i] : ',' + arr[i];
+    }
+    log += (printSize) ?  '] => ' + arr.length + ' elements' : ']';
+    if (_log)
+        console.log(log);
+    else
+        return log;
+}
+
+function print2DArray(arr) {
+    let log = '[\n  [';
+    for (let i=0; i<arr.length; i++) {
+        log += arr[i].join(', ');
+        log += (i === arr.length-1) ? ']' : ']\n  [';
+    }
+    log += '\n]';
+    console.log(log);
 }
 
 /**
@@ -469,4 +492,104 @@ function multiplySquareMatrixNormalMehtod(matrix1, matrix2) {
         }
     }
     return res;
+}
+
+function getAllSebsquences(arr, size, offset = 0) {
+    // base cases
+    if (size === 1)
+        return arr.slice(offset).map(val => [val]);
+    else if (size === 0)
+        return [arr];
+    /**
+     * for each position list all the possible subsequences
+     * by calling the function recursively then prepending the
+     * current element, like listing all possible combinations
+     * with two nested for loops
+     */
+    let subs = [];
+    for (let i = offset; i < arr.length; i++) {
+        let _subs = getAllSebsquences(arr, size - 1, i + 1);
+        _subs.forEach(subArray => subs.push([arr[i], ...subArray]));
+    }
+    return subs;
+}
+
+// ϴ(n*2^n)
+// this will break easily for large inputs
+function longestCommonSubsequenceBruteforce(arr1, arr2) {
+    let lcs = '';
+    // let arr be the shorter and secondArr the longer array
+    // because the sequence length can be a maximum of arr length
+    let arr, secondArr;
+    if (arr1.length <= arr2.length) {
+        arr = arr1; secondArr = arr2;
+    } else {
+        arr = arr2; secondArr = arr1;
+    }
+
+    /**
+     * list all possible subsequences of arr of all sizes
+     * and for each one check if it exists in secondArr
+     * if it does update the longest common subsequence
+     */
+    for (let i = 1; i <= arr.length; i++) {
+        let subs = getAllSebsquences(arr, i);
+        console.log(`Number of Subsequences of size ${i} : ${subs.length}`);
+        
+        for (let j = 0; j < subs.length; j++) {
+            let subsFound = true;
+            let lastIndex = -1;
+            for (let k = 0; k < subs[j].length; k++) {
+                let index = secondArr.indexOf(subs[j][k], lastIndex + 1);
+                if (index === -1) {
+                    subsFound = false; break;
+                } else
+                    lastIndex = index;
+            }
+            if (subsFound && subs[j].length > lcs.length)
+                lcs = subs[j].join('');
+        }
+    }
+    return lcs;
+}
+
+// ϴ(n^2)
+// Dynamic Programming 
+function longestCommonSubsequence(arr1, arr2) {
+    let dpTable = [];
+    let pathTable = [];
+    dpTable[0] = new Array(arr2.length+1).fill(0);
+    // build the dp table and the path table
+    for (let i=0; i<arr1.length; i++) {
+        dpTable[i+1] = [0];
+        pathTable[i] = [];
+        for (let j=0; j<arr2.length; j++) {
+            if ( arr1[i] === arr2[j]) {
+                dpTable[i+1][j+1] = 1 + dpTable[i][j];
+                pathTable[i][j] = '↖';
+            } else
+                if (dpTable[i][j+1] >= dpTable[i+1][j]) {
+                    dpTable[i+1][j+1] = dpTable[i][j+1];
+                    pathTable[i][j] = '↑';
+                } else {
+                    dpTable[i+1][j+1] = dpTable[i+1][j];
+                    pathTable[i][j] = '←';
+                }
+        }
+    }
+    // follow the path to find the subsequence
+    let i=arr1.length-1, j=arr2.length-1;
+    let lcs = [];
+    while (i>=0 && j>=0) {
+        if (pathTable[i][j] === '↖') {
+            lcs.push(arr1[i]);
+            i--; j--; // go diagnol
+        } else if (pathTable[i][j] === '↑') {
+            i--; // go up
+        } else {
+            j--; // go left
+        }
+    }
+    return lcs.reverse().join('');
+    // return dpTable[arr1.length][arr2.length];
 }
